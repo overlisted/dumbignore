@@ -9,6 +9,8 @@ const octokit = new Octokit({
 const fetch = require("node-fetch");
 const fs = require("fs");
 
+const dumbignoreId = 339607210;
+
 const fetchAllRepos = async (amount, since) => {
   let result = [];
   
@@ -32,10 +34,16 @@ const includes = (gi, rule) => gi.some(it => rule.startsWith(it));
 const merge = (a, b) => a.concat(b.filter(it => !includes(a, it)));
 const cleanup = gi => gi.filter(it => it.length > 0 && it[0] !== "#");
 
+const randomMax = max => Math.floor(Math.random() * max);
+const randomMaxPadding = (max, padding) => {
+  const random = randomMax(max);
+  return random + padding > max ? max - padding : random;
+};
+
 const main = async () => {
   console.log("=> Fetching repos");
   const useRepos = parseInt(process.env.USE_REPOS);
-  const repos = await fetchAllRepos(useRepos, process.env.USE_REPOS_SINCE_ID);
+  const repos = await fetchAllRepos(useRepos, randomMaxPadding(dumbignoreId, useRepos));
   
   console.log("=> Downloading .gitignores");
   const optionalGitignores = await Promise.all(repos.map(it => fetchGitignore(it.full_name)));
