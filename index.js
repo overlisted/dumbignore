@@ -34,7 +34,8 @@ const cleanup = gi => gi.filter(it => it.length > 0 && it[0] !== "#");
 
 const main = async () => {
   console.log("=> Fetching repos");
-  const repos = await fetchAllRepos(process.env.USE_REPOS, process.env.USE_REPOS_SINCE_ID);
+  const useRepos = parseInt(process.env.USE_REPOS);
+  const repos = await fetchAllRepos(useRepos, process.env.USE_REPOS_SINCE_ID);
   
   console.log("=> Downloading .gitignores");
   const optionalGitignores = await Promise.all(repos.map(it => fetchGitignore(it.full_name)));
