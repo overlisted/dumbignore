@@ -13,7 +13,7 @@ const fetchAllRepos = async (amount, since) => {
   let result = [];
   
   while(result.length < amount) {
-    const { data: chunk } = await octokit.repos.listPublic({ since });
+    const { data: chunk } = await octokit.repos.listPublic({ since: result.length > 0 ? result[result.length - 1].id : since });
     
     result = result.concat(chunk);
   }
