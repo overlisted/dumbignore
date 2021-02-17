@@ -24,10 +24,14 @@ const fetchAllRepos = async (amount, since) => {
 };
 
 const fetchGitignore = async repoName => {
-  const res = await fetch(`https://raw.githubusercontent.com/${repoName}/master/.gitignore`);
-  if(!res.ok) return;
-  
-  return await res.text();
+  try {
+    const res = await fetch(`https://raw.githubusercontent.com/${repoName}/master/.gitignore`);
+    if(!res.ok) return;
+
+    return await res.text();
+  } catch(e) {
+    console.error(e);
+  }
 }
 
 const includes = (gi, rule) => gi.some(it => rule.startsWith(it));
@@ -40,13 +44,34 @@ const randomMaxPadding = (max, padding) => {
   return random + padding > max ? max - padding : random;
 };
 
+const asyncMap = async (array, callback, batchSize) => {
+  let result = [];
+  let batch;
+  
+  for(let a = 0; a < array.length; a += batchSize ?? 1) {
+    batch = [];
+    for(let b = 0; b < batchSize ?? 1; b++) {
+      const i = a + b;
+      if(i < array.length) batch.push(callback(array[i], i, array));
+    }
+    result = result.concat(await Promise.all(batch));
+  }
+  
+  return result;
+}
+
 const main = async () => {
   console.log("=> Fetching repos");
   const useRepos = parseInt(process.env.USE_REPOS);
   const repos = await fetchAllRepos(useRepos, randomMaxPadding(dumbignoreId, useRepos));
   
   console.log("=> Downloading .gitignores");
-  const optionalGitignores = await Promise.all(repos.map(it => fetchGitignore(it.full_name)));
+  const optionalGitignores = await asyncMap(
+    repos, 
+    it => fetchGitignore(it.full_name), 
+    parseInt(process.env.PARALLEL_DOWNLOADS)
+  );
+  
   const gitignores = optionalGitignores.filter(it => !!it).map(it => it.split("\n"));
   
   console.log("=> Merging");
