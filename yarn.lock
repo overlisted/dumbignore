@@ -137,6 +137,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base-64@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "base-64@npm:1.0.0"
+  checksum: 7ff7383b2c341c5c7ec55c2ea0c19157e86ef0484a3d5f27fe165158f42c271ddc9049b98f3c5c09f38c240c5d46177d4ea7e000b7457d3591aa212fb18e6f7c
+  languageName: node
+  linkType: hard
+
 "before-after-hook@npm:^2.1.0":
   version: 2.1.1
   resolution: "before-after-hook@npm:2.1.1"
@@ -163,8 +170,10 @@ __metadata:
   resolution: "dumbignore@workspace:."
   dependencies:
     "@octokit/rest": ^18.1.1
+    base-64: ^1.0.0
     dotenv: ^8.2.0
     node-fetch: ^2.6.1
+    utf8: ^3.0.0
   languageName: unknown
   linkType: soft
 
@@ -195,6 +204,13 @@ __metadata:
   version: 6.0.0
   resolution: "universal-user-agent@npm:6.0.0"
   checksum: 725797ab636f1786a824f805eca2b227019ae8e82fdbe03e3e26a7f2917669bfcf7ef723c7d4b2c60a5e1603108d32bec3987b4f52821360523cb609fb7ae782
+  languageName: node
+  linkType: hard
+
+"utf8@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "utf8@npm:3.0.0"
+  checksum: 5a82761c09db35965210fcd10edc92b52a3ed2be7756858856341d5c4cf029a25b2d96b0c79fd1b8cd38a339913d0536e8918130f150e7fe2d9b8e3954bb9dac
   languageName: node
   linkType: hard
 

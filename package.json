@@ -5,7 +5,9 @@
   },
   "dependencies": {
     "@octokit/rest": "^18.1.1",
+    "base-64": "^1.0.0",
     "dotenv": "^8.2.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "utf8": "^3.0.0"
   }
 }

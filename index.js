@@ -8,6 +8,8 @@ const octokit = new Octokit({
 
 const fetch = require("node-fetch");
 const fs = require("fs");
+const base64 = require("base-64");
+const utf8 = require("utf8");
 
 const dumbignoreId = 339607210;
 
@@ -23,14 +25,17 @@ const fetchAllRepos = async (amount, since) => {
   return result.slice(0, amount);
 };
 
-const fetchGitignore = async repoName => {
+const fetchGitignore = async full_name => {
   try {
-    const res = await fetch(`https://raw.githubusercontent.com/${repoName}/master/.gitignore`);
-    if(!res.ok) return;
+    const request = await octokit.request(`GET /repos/${full_name}/contents/.gitignore`);
+    
+    const file = request.data;
+    if(file.encoding !== "base64") return;
 
-    return await res.text();
+    return utf8.decode(base64.decode(file.content.replaceAll("\n", "")));
   } catch(e) {
-    console.error(e);
+    if(e.status === 451) console.info(`${full_name} is banned by DCMA`);
+    if(e.status !== 404) console.error(e);
   }
 }
 
@@ -97,7 +102,6 @@ const main = async () => {
   console.log("=> Cleaning up");
   const allinone = cleanup(gitignores.reduce((a, b) => a.concat(b)));
   
-  fs.writeFileSync("unfiltered.txt", gitignores.reduce((a, b) => a.concat(b)).join("\n"));
   fs.writeFileSync("output.txt", allinone.join("\n"));
   console.log(`There you go! Your new useless .gitignore is in output.txt (${allinone.length} lines)`);
 };
