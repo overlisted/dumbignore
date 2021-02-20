@@ -34,9 +34,29 @@ const fetchGitignore = async repoName => {
   }
 }
 
-const includes = (gi, rule) => gi.some(it => rule.startsWith(it));
-const merge = (a, b) => a.concat(b.filter(it => !includes(a, it)));
-const cleanup = gi => gi.filter(it => it.length > 0 && it[0] !== "#");
+// array: T[], callback: (item: T, index: integer, array: T[], filtered: T[], toFilter: T[]) => R
+const extendedFilter = (array, callback) => {
+  const result = [];
+  for(let i = 0; i < array.length; i++) {
+    if(callback(array[i], i, array, result, array.slice(i + 1))) result.push(array[i]);
+  }
+  
+  return result;
+}
+
+const arrayStartsWith = (a, b) => {
+  for(let i = 0; i < b.length; i++) {
+    if(b[i] != a[i]) return false;
+  }
+  
+  return true;
+}
+
+const includes = (gi, rule) => gi.some(it => arrayStartsWith(rule.split("/"), it.split("/")));
+const removeFirstSlash = rule => rule.startsWith("/") ? rule.slice(1) : rule.startsWith("!/") ? "!" + rule : rule;
+const removeLastSlash = rule => rule.endsWith("/") ? rule.slice(0, -1) : rule;
+const removeExtraSlashes = rule => removeLastSlash(removeFirstSlash(rule));
+const cleanup = gi => extendedFilter(gi.map(removeExtraSlashes), (it, i, _, filtered, toFilter) => it.length > 0 && it[0] !== "#" && !includes(toFilter, it) && !includes(filtered, it));
 
 const randomMax = max => Math.floor(Math.random() * max);
 const randomMaxPadding = (max, padding) => {
@@ -74,9 +94,10 @@ const main = async () => {
   
   const gitignores = optionalGitignores.filter(it => !!it).map(it => it.split("\n"));
   
-  console.log("=> Merging");
-  const allinone = gitignores.map(cleanup).reduce(merge);
+  console.log("=> Cleaning up");
+  const allinone = cleanup(gitignores.reduce((a, b) => a.concat(b)));
   
+  fs.writeFileSync("unfiltered.txt", gitignores.reduce((a, b) => a.concat(b)).join("\n"));
   fs.writeFileSync("output.txt", allinone.join("\n"));
   console.log(`There you go! Your new useless .gitignore is in output.txt (${allinone.length} lines)`);
 };
